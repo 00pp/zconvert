@@ -111,6 +111,7 @@ class Fileupload extends Component
 
             //chains the jobs in order
             //to convert doc,docx to images
+          
             Bus::chain([
                 new  DockToPdfConverter($this->folderName),
                 new PdfToImageConverter($this->conversion, $sourceOfPdfs),

@@ -3,7 +3,10 @@
 /public/storage
 /storage/*.key
 /vendor
+.idea/
 .env
+yarn.lock
+package-lock.json
 .env.backup
 .phpunit.result.cache
 docker-compose.override.yml
