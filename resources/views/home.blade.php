@@ -79,10 +79,23 @@
             </div>
         </section>
 
-        {{--        =================== file uploader ==============================--}}
-        <livewire:fileupload />
-        {{--        =================== file uploader ==============================--}}
 
+        <div class="max-w-6xl mx-auto px-5 py-24 ">
+
+        <div class="flex flex-wrap -mx-1 overflow-hidden sm:-mx-2">
+            @foreach (config('convertor.types') as $key => $type)
+                @foreach ($type['to'] as $typeTo)
+                <div class="flex-auto rounded-md flex items-center justify-center py-3 px-6">
+                    <a href="/convert/{{$key}}-to-{{$typeTo}}" class="bg-gray-900 text-white leading-normal d-block rounded-md flex items-center justify-center py-3 px-6 uppercase">
+                        {{$key}} to {{$typeTo}}
+                    </a>
+                    
+                </div>
+                @endforeach
+            @endforeach
+          </div>
+        </div>
+     
     </div>
 
 

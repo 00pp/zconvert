@@ -175,7 +175,8 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,  
         Barryvdh\DomPDF\ServiceProvider::class,
-        \App\Providers\RepositoryServiceProvider::class
+        \App\Providers\RepositoryServiceProvider::class,
+        Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
 
     ],
 

@@ -15,6 +15,23 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', 'App\Http\Controllers\HomeController@index')->name('home');
 
+Route::get('/convert/{type}', 'App\Http\Controllers\ConvertorController@index')->name('convertor.page');
+
+Route::get('/about', function () {
+    return view('pages.about');
+})->name('page.about');
+
+Route::get('/terms', function () {
+    return view('pages.terms');
+})->name('page.terms');
+
+Route::get('/contacts', function () {
+    return view('pages.contacts');
+})->name('page.contacts');
+
+
+
+
 // Route::get('/api/test/convert/doc/to/pdf', 'App\Http\Controllers\HomeController@convertDocToPdf')->name('dock.to.pdf');
 // Route::get('/api/test/convert/pdf/to/image', 'App\Http\Controllers\HomeController@convertPdfToImage')->name('pdf.to.image');
 // Route::get('/api/test/zip/files', 'App\Http\Controllers\HomeController@zipFiles');
