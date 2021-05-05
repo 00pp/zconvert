@@ -10,6 +10,7 @@ use App\Services\ConvertorService;
 use App\Models\StorageFolder;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Storage;
 use Validator;
 
 class Convertor extends Component
@@ -72,10 +73,7 @@ class Convertor extends Component
         $totalFiles = count($this->files) + count($this->newfiles);
 
         $rules = 'required|file|' . $this->config['rules'] . '|max:' . config('app.max_file_size_limit');
-        // $this->validate([
-        //     'newfiles.*' => 'required|file|'.$this->config['rules'].'|max:'.config('app.max_file_size_limit'),            
-        // ]);
-
+     
         $validator = Validator::make(
             ['newfiles' => $this->newfiles],
             [
@@ -159,14 +157,15 @@ class Convertor extends Component
 
     public function download()
     {
-        $path = storage_path()  . '/' . $this->storageFolder->name . '.zip';
+        $path = storage_path('app/public/' . $this->storageFolder->name . '.zip');
 
         $this->storageFolder->conversion->downloaded_at = Carbon::now();
         $this->storageFolder->conversion->save();
-
-        //download the zipped file if exist
+       
         if (file_exists($path)) {
-            return response()->download($path);
+            return Storage::disk('public')->download($this->storageFolder->name . '.zip');
+        }else{
+            $this->sendMessage('File deleted from server', 'error');
         }
     }
 

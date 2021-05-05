@@ -58,8 +58,7 @@ class ConvertorService
     $folderName = 'uploaded/' . $storageFolder->name;
     $sourceOfPdfs = Storage::path($folderName) . "/pdf";
     $sourceOfImages = $sourceOfPdfs."/images";
-    $destination = storage_path();
-
+    $destination = storage_path('app/public');
 
     Bus::chain([
       new DockToPdfConverter($folderName),
@@ -80,7 +79,7 @@ class ConvertorService
   {
     $folderName = 'uploaded/' . $storageFolder->name;
     $sourceOfPdfs = Storage::path($folderName) . "/pdf";
-    $destination = storage_path();
+    $destination = storage_path('app/public');
 
     Bus::chain([
       new DockToPdfConverter($folderName),
