@@ -163,7 +163,12 @@ class Convertor extends Component
         $this->storageFolder->conversion->save();
        
         if (file_exists($path)) {
-            return Storage::disk('public')->download($this->storageFolder->name . '.zip');
+            
+            $headers = array(
+                'Content-Type' => 'application/octet-stream',
+            );
+
+            return Storage::disk('public')->download($this->storageFolder->name . '.zip', $this->storageFolder->name . '.zip' , $headers);
         }else{
             $this->sendMessage('File deleted from server', 'error');
         }
