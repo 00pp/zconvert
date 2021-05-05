@@ -6,10 +6,12 @@
         </div>
     @endif
 
-    <div wire:loading.block wire:target="convert" class="text-center py-15">
+    @if($converting)
+    <div  class="text-center py-15">
         @include('svg.loading')
         <p class="mt-3">Converting...</p>
     </div>
+    @endif
 
     <div wire:loading.block wire:target="newfiles" class="text-center py-15">
         @include('svg.loading')
@@ -20,7 +22,7 @@
     @error('newfiles') <span class="error">{{ $message }}</span> @enderror
 
 
-    @if (count($files) && !$isFinished)
+    @if (count($files) && !$isFinished  && !$converting)
         <table wire:loading.remove wire:target="convert"
             class="mx-auto max-w-4xl w-full whitespace-nowrap rounded-lg bg-white divide-y divide-gray-300 overflow-hidden mt-10 rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blu">
 
@@ -49,7 +51,7 @@
 
     <form enctype="multipart/form-data" wire:loading.remove wire:target="convert">
 
-        @if ($isFinished)
+        @if ($isFinished && !$converting)
             <div class="flex w-full pt-24 pb-10 items-center justify-center bg-grey-lighter">
                 <button wire:click.prevent="download"
                     class="w-64 flex flex-col items-center px-4 py-6 bg-green-400 text-white rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blue hover:text-gray-800">
@@ -59,11 +61,11 @@
             </div>
 
             <div class="flex justify-center pb-24">
-                <button wire:click.prevent="refresh" class="flex items-center"> @include('svg.reset') <span
-                        class="ml-2">Convert more</span></button>
+                <a href="{{route('convertor.page',['type'=>$currentType])}}" class="flex items-center"> @include('svg.reset') <span
+                        class="ml-2">Convert more</span></a>
             </div>
 
-        @else
+        @elseif(!$converting)
             @if (count($files))
                 <div class="flex py-10">
                     @if (count($files) < config('app.max_files_allowed'))
@@ -139,6 +141,13 @@
         Livewire.on('showAlert', data => {
             toastr[data.type]( data.message, data.title);
             // console.log(message, type);
+        });
+
+
+
+        window.Echo.channel('laravel_database_converts-{{$storageFolder->id}}')
+        .listen('App\\Events\\ConvertStatusUpdate', (e) => {
+            console.log(e);
         });
 
     });

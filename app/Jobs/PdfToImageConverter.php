@@ -44,10 +44,7 @@ class PdfToImageConverter implements ShouldQueue
         //interface method
         $result = $pdfToImage->convertFiles($this->source,$this->folderNameToHoldImages);
 
-        //same the time when the files are converted
-        $this->conversion->converted_at = Carbon::now();
-        $this->conversion->status = "converted";
-        $this->conversion->save();
+      
 
         \Log::info(get_class($this) . ": $this->source");
 

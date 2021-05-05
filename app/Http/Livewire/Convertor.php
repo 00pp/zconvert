@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Models\Conversion;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Services\Helper;
@@ -18,6 +19,7 @@ class Convertor extends Component
     public $currentType;
     public $config;
     public $isFinished;
+    public $converting = false;
 
     public $files = [];
     public $newfiles = [];
@@ -27,15 +29,40 @@ class Convertor extends Component
 
     // protected $listeners = ['showAlert'];
 
+    // protected $listeners = ['echo-private:converts,ConvertStatusUpdate' => 'refreshStatus'];
+
 
     public function mount()
     {
-        $this->isFinished = false;
+        $this->isFinished = false;     
         $parts = explode('-', $this->currentType);
         $this->config = config('convertor.types.' . $parts[0]);
 
-        // $rules = 'required|file|'.$this->config['rules'].'|max:'.config('app.max_file_size_limit');
+        $directoryName = Helper::uniqueName(); //create a storage folder record
+        $storageFolder = new StorageFolder;
+        $storageFolder->name = $directoryName;
+        $storageFolder->save();
+        $this->storageFolder = $storageFolder;
 
+    }
+
+
+    public function getListeners()
+    {
+        return [
+            "echo:laravel_database_converts-{$this->storageFolder->id},ConvertStatusUpdate" => 'refreshStatus',
+        ];
+    }
+
+
+
+    public function refreshStatus($event)
+    {
+        $this->isFinished = true;
+        $this->converting = false;
+        $this->files = [];
+        $this->newfiles = [];
+        $this->sendMessage('Converted Successfully!', 'success');
     }
 
 
@@ -92,14 +119,11 @@ class Convertor extends Component
     public function convert()
     {
 
-        $directoryName = Helper::uniqueName();
+        $this->converting = true;
 
-        $folderName = 'uploaded/' . $directoryName;
+        $folderName = 'uploaded/' . $this->storageFolder->name;
 
-        //create a storage folder record
-        $this->storageFolder = $storageFolder = new StorageFolder;
-        $storageFolder->name = $directoryName;
-        $storageFolder->save();
+        $storageFolder = $this->storageFolder;
 
         foreach ($this->files as $file) {
             $fileName = $file->storePublicly($folderName);
@@ -111,33 +135,27 @@ class Convertor extends Component
 
         $fromTo = explode('-to-', $this->currentType);
 
-        //create a new conversion record
-        $conversion =  $storageFolder->conversion()->create([
+
+        $storageFolder->conversion()->create([
             'from_type' => $fromTo[0],
             'to_type' => $fromTo[1]
         ]);
 
 
+        $result = StorageFolder::find($storageFolder->id);
+
+        // event(new \App\Events\ConvertStatusUpdate($this->storageFolder));   
+
+
         $method = Str::camel($this->currentType);
 
-        ConvertorService::$method($storageFolder);
+        ConvertorService::$method($result);
 
-        $this->isFinished = true;
-        $this->files = [];
-        $this->newfiles = [];
-
-        session()->flash('success', 'Converted Successfully!');
+      
     }
 
 
 
-    public function refresh()
-    {
-        $this->isFinished = false;
-        $this->files = [];
-        $this->newfiles = [];
-        $this->storageFolder = null;
-    }
 
     public function download()
     {

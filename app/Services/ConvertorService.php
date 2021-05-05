@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Bus;
 use App\Jobs\DockToPdfConverter;
 use App\Jobs\PdfToImageConverter;
 use App\Jobs\ZipFiles;
+use Illuminate\Bus\Batch;
+use Carbon\Carbon;
 
 
 class ConvertorService
@@ -58,10 +60,18 @@ class ConvertorService
     $sourceOfImages = $sourceOfPdfs."/images";
     $destination = storage_path();
 
+
     Bus::chain([
       new DockToPdfConverter($folderName),
       new PdfToImageConverter($storageFolder->conversion, $sourceOfPdfs),
-      new ZipFiles($storageFolder->conversion, $storageFolder->name, $sourceOfImages, $destination)
+      new ZipFiles($storageFolder->conversion, $storageFolder->name, $sourceOfImages, $destination),
+      function() use ($storageFolder){
+        event(new \App\Events\ConvertStatusUpdate($storageFolder));
+
+        $storageFolder->conversion->converted_at = Carbon::now();
+        $storageFolder->conversion->status = "converted";
+        $storageFolder->conversion->save();
+      }
     ])->dispatch();
   }
 
@@ -74,7 +84,15 @@ class ConvertorService
 
     Bus::chain([
       new DockToPdfConverter($folderName),
-      new ZipFiles($storageFolder->conversion, $storageFolder->name, $sourceOfPdfs, $destination)
+      new ZipFiles($storageFolder->conversion, $storageFolder->name, $sourceOfPdfs, $destination),
+      function() use ($storageFolder){        
+
+        event(new \App\Events\ConvertStatusUpdate($storageFolder));
+
+        $storageFolder->conversion->converted_at = Carbon::now();
+        $storageFolder->conversion->status = "converted";
+        $storageFolder->conversion->save();
+      }
     ])->dispatch();
   }
 }

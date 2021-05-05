@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\StorageFolder;
 use Illuminate\Support\Facades\Broadcast;
 
 /*
@@ -13,6 +14,16 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
-Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
+// Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
+//     return (int) $user->id === (int) $id;
+// });
+
+
+Broadcast::channel('converts-{id}', function ($id) {
+
+    $storageFolder = StorageFolder::find($id);
+    return [
+        'id' => $storageFolder->id,
+        'name' => $storageFolder->name,
+    ];
 });
