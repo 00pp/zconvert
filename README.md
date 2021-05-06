@@ -53,5 +53,10 @@ SESSION_DRIVER = file
 - php artisan cache:clear
 - php artisan config:clear
 
+## Misc
+
+- нужно ли, чтоб libreoffice работал как сервер? - нет
+- в какую папку складываются файлы, которые подгружаются и потом конвертируются? - storage/app/public
+
 
 
