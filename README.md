@@ -11,6 +11,7 @@
 
 - composer install
 - npm install
+- npm install - g laravel-echo-server
 - php artisan migrate
 - настросить supervisor
 
