@@ -19,11 +19,11 @@ use Illuminate\Support\Facades\Broadcast;
 // });
 
 
-Broadcast::channel('converts-{id}', function ($id) {
+// Broadcast::channel('converts-{id}', function ($id) {
 
-    $storageFolder = StorageFolder::find($id);
-    return [
-        'id' => $storageFolder->id,
-        'name' => $storageFolder->name,
-    ];
-});
+//     $storageFolder = StorageFolder::find($id);
+//     return [
+//         'id' => $storageFolder->id,
+//         'name' => $storageFolder->name,
+//     ];
+// });

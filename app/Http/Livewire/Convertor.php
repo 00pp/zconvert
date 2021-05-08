@@ -64,6 +64,7 @@ class Convertor extends Component
         $this->files = [];
         $this->newfiles = [];
         $this->sendMessage('Converted Successfully!', 'success');
+        $this->download();
     }
 
 
@@ -76,9 +77,7 @@ class Convertor extends Component
      
         $validator = Validator::make(
             ['newfiles' => $this->newfiles],
-            [
-                'newfiles.*' => $rules,
-            ]
+            ['newfiles.*' => $rules]
         );
 
         if ($validator->fails()) {

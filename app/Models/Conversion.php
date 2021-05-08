@@ -13,6 +13,6 @@ class Conversion extends Model
 
     public function folder(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(StorageFolder::class);
+        return $this->belongsTo(StorageFolder::class, 'storage_folder_id');
     }
 }
