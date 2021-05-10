@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\ConvertionStatusChanged;
 use App\Models\StorageFolder;
 use Illuminate\Support\Str;
 use Storage;
@@ -15,82 +16,57 @@ use Carbon\Carbon;
 
 class ConvertorService
 {
-  // public static function convert($files, $type)
-  // {
 
-  //   $directoryName = Helper::uniqueName();
-
-  //   $folderName = 'uploaded/' . $directoryName;
-
-  //   //create a storage folder record
-  //   $storageFolder = new StorageFolder;
-  //   $storageFolder->name = $directoryName;
-  //   $storageFolder->save();
-
-  //   foreach ($files as $file) {
-  //     $fileName = $file->storePublicly($folderName);
-
-  //     $storageFolder->files()->create([
-  //       'name' => $fileName
-  //     ]);
-  //   }
-
-  //   $fromTo = explode('-to-', $type);
-
-  //   //create a new conversion record
-  //   $conversion =  $storageFolder->conversion()->create([
-  //     'from_type' => $fromTo[0],
-  //     'to_type' => $fromTo[1]
-  //   ]);
+  protected $uploadFolder;
+  protected $storageFolder;
+  protected $destination;
 
 
-  //   $method = Str::camel($type);
-
-
-  //   self::$method($storageFolder);
-
-  // }
-
-
-
-  public static function docxToJpg(StorageFolder $storageFolder)
+  public function __construct(StorageFolder $storageFolder,  $destination = null)
   {
-    $folderName = 'uploaded/' . $storageFolder->name;
-    $sourceOfPdfs = Storage::path($folderName) . "/pdf";
-    $sourceOfImages = $sourceOfPdfs."/images";
-    $destination = storage_path('app/public');
+    $this->storageFolder = $storageFolder;
+    $this->uploadFolder = storage_path('app/uploaded/' . $storageFolder->name);
+
+
+    if (!is_null($destination)) {
+      $this->destination = $destination;
+    } else {
+      $this->destination = storage_path('app/public');
+    }
+  }
+
+
+  public  function docxToJpg()
+  {
+
+    $pdfFolder = $this->uploadFolder . "/pdf";
+    $imageFolder = $this->uploadFolder . "/images";
+    $storageFolder = $this->storageFolder;
 
     Bus::chain([
-      new DockToPdfConverter($folderName),
-      new PdfToImageConverter($storageFolder->conversion, $sourceOfPdfs),
-      new ZipFiles($storageFolder->conversion, $storageFolder->name, $sourceOfImages, $destination),
-      function() use ($storageFolder){
-        event(new \App\Events\ConvertStatusUpdate($storageFolder));
-
-        $storageFolder->conversion->converted_at = Carbon::now();
-        $storageFolder->conversion->status = "converted";
-        $storageFolder->conversion->save();
+      new DockToPdfConverter($this->uploadFolder, $pdfFolder),
+      new PdfToImageConverter($pdfFolder, $imageFolder),
+      new ZipFiles($imageFolder, $this->destination, $storageFolder->conversion, $storageFolder->name),
+      function () use ($storageFolder) {
+        event(new \App\Events\ConvertStatusUpdateEcho($storageFolder));
+        event(new ConvertionStatusChanged($storageFolder->conversion, 'converted'));
       }
+
     ])->dispatch();
   }
 
 
-  public static function docxToPdf(StorageFolder $storageFolder)
+  public  function docxToPdf()
   {
-    $folderName = 'uploaded/' . $storageFolder->name;
-    $sourceOfPdfs = Storage::path($folderName) . "/pdf";
-    $destination = storage_path('app/public');
+    $pdfFolder = $this->uploadFolder . "/pdf";
+    $storageFolder = $this->storageFolder;
 
     Bus::chain([
-      new DockToPdfConverter($folderName),
-      new ZipFiles($storageFolder->conversion, $storageFolder->name, $sourceOfPdfs, $destination),
-      function() use ($storageFolder){        
-
-        event(new \App\Events\ConvertStatusUpdate($storageFolder));
-
-        $storageFolder->conversion->converted_at = Carbon::now();
-        $storageFolder->conversion->status = "converted";
-        $storageFolder->conversion->save();
+      new DockToPdfConverter($this->uploadFolder, $pdfFolder),
+      new ZipFiles($pdfFolder, $this->destination, $storageFolder->conversion, $storageFolder->name),
+      function () use ($storageFolder) {
+        event(new \App\Events\ConvertStatusUpdateEcho($storageFolder));
+        event(new ConvertionStatusChanged($storageFolder->conversion, 'converted'));
       }
     ])->dispatch();
   }

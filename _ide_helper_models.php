@@ -51,11 +51,13 @@ namespace App\Models{
  * @property string $name
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $filename
  * @property-read \App\Models\StorageFolder $storageFolder
  * @method static \Illuminate\Database\Eloquent\Builder|File newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|File newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|File query()
  * @method static \Illuminate\Database\Eloquent\Builder|File whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|File whereFilename($value)
  * @method static \Illuminate\Database\Eloquent\Builder|File whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|File whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|File whereStorageFolderId($value)
@@ -83,6 +85,7 @@ namespace App\Models{
  * @property string $name
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $filename
  * @property-read \App\Models\Conversion|null $conversion
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\File[] $files
  * @property-read int|null $files_count
@@ -90,6 +93,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|StorageFolder newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|StorageFolder query()
  * @method static \Illuminate\Database\Eloquent\Builder|StorageFolder whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|StorageFolder whereFilename($value)
  * @method static \Illuminate\Database\Eloquent\Builder|StorageFolder whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|StorageFolder whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|StorageFolder whereUpdatedAt($value)

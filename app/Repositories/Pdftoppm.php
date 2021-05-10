@@ -10,7 +10,7 @@ class Pdftoppm implements PdfToImageInterface
 
     public function execute($file)
     {
-        return  $result = shell_exec("pdftoppm $file good -jpeg");
+        return  shell_exec("pdftoppm $file good -jpeg");
     }
 
     public function convertFiles($source, $destination)

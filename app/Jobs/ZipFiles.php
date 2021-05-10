@@ -6,6 +6,7 @@ use Illuminate\Bus\Batchable;
 use App\Events\FilesHaveBeenZipped;
 use App\Repositories\Interfaces\ZipFilesInterface;
 use Carbon\Carbon;
+use Event;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -24,12 +25,12 @@ class ZipFiles implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($conversion, $fileName, $source, $destination)
-    {
-        $this->filename = $fileName;
+    public function __construct($source, $destination, $conversion, $filename)
+    {      
         $this->source = $source;
         $this->destination = $destination;
-        $this->conversion = $conversion;
+        $this->conversion= $conversion;
+        $this->filename = $filename;
     }
 
     /**
@@ -39,14 +40,23 @@ class ZipFiles implements ShouldQueue
      */
     public function handle(ZipFilesInterface $zip)
     {
-        $zip->execute($this->filename,$this->source,$this->destination);
+        $filesInFolder = \File::files($this->source);
 
-        //set the time when the zipping is done
-        $this->conversion->zipped_at = Carbon::now();
+        //Если в папке больше 1 файлов то добавляем в архив
+        if(count($filesInFolder) > 1){
+            $zip->execute($this->filename,$this->source,$this->destination);
+            $this->conversion->zipped_at = Carbon::now();
+            $this->destination = $this->destination.'/'.$this->filename.'.zip';
+
+        }else{
+
+            $this->destination = $this->destination.'/'.$filesInFolder[0]->getFilename();
+            \File::copy($filesInFolder[0]->getPathname(), $this->destination);
+        }
+        
+        $this->conversion->filename = $this->destination;
         $this->conversion->save();
 
         \Log::info(get_class($this) . ":  $this->filename");
-        //FilesHaveBeenZipped::dispatch($this->filename);
-
     }
 }

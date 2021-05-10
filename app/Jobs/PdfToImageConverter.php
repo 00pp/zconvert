@@ -18,19 +18,17 @@ class PdfToImageConverter implements ShouldQueue
 {
     use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $source;
-    protected $conversion;
-    protected $folderNameToHoldImages;
+    protected $pdfFolder;
+    protected $imageFolder;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($conversion, $source)
+    public function __construct($pdfFolder, $imageFolder)
     {
-        $this->conversion = $conversion;
-        $this->source = $source;
-        $this->folderNameToHoldImages = Helper::$folderNameToHoldImages;
+        $this->pdfFolder = $pdfFolder;
+        $this->imageFolder = $imageFolder;
     }
 
     /**
@@ -41,12 +39,7 @@ class PdfToImageConverter implements ShouldQueue
     public function handle(PdfToImageInterface $pdfToImage)
     {
 
-        //interface method
-        $result = $pdfToImage->convertFiles($this->source,$this->folderNameToHoldImages);
-
-      
-
-        \Log::info(get_class($this) . ": $this->source");
-
+        $pdfToImage->convertFiles($this->pdfFolder, $this->imageFolder);
+        \Log::info(get_class($this) . ": $this->pdfFolder");
     }
 }

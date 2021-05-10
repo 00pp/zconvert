@@ -17,18 +17,19 @@ class DockToPdfConverter implements ShouldQueue
 {
     use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $source;
-    protected $folderNameHoldingPdfFiles;
+    protected $docFolder;
+
+    protected $pdfFolder;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($source)
+    public function __construct($docFolder, $pdfFolder)
     {
-        $this->source = $source;
-        $this->folderNameHoldingPdfFiles = Helper::$folderNameHoldingPdfFiles;
+        $this->docFolder = $docFolder . "/*";
+        $this->pdfFolder = $pdfFolder;
 
     }
 
@@ -39,18 +40,8 @@ class DockToPdfConverter implements ShouldQueue
      */
     public function handle(DocToPdfInterface $docToPdf)
     {
+        $docToPdf->convertFiles($this->docFolder, $this->pdfFolder);
 
-        $path = $this->source . "/*";
-
-        $files =  Storage::path("$path");
-        $output = Storage::path("$this->source/$this->folderNameHoldingPdfFiles");
-
-        //interface method
-        $docToPdf->convertFiles($files, $output);
-
-        //$this->convertFilesToImage($pdfToImage,$uploadedPath, $zip);
-
-        \Log::info(get_class($this) . ": $this->source");
-
+        \Log::info(get_class($this) . ": $this->docFolder");
     }
 }

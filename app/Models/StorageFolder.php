@@ -9,7 +9,7 @@ class StorageFolder extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['id'];
+    protected $fillable = ['id', 'filename', 'name'];
 
     protected $with = ['files', 'conversion'];
 

@@ -10,7 +10,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ConvertStatusUpdate implements ShouldBroadcast
+class ConvertStatusUpdateEcho implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 

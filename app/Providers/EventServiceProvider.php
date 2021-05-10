@@ -21,6 +21,10 @@ class EventServiceProvider extends ServiceProvider
             SendEmailVerificationNotification::class,
         ],
 
+        'App\Events\ConvertionStatusChanged' => [
+            'App\Listeners\ChangeConvertionStatus'
+        ],
+
         FilesHaveBeenZipped::class => [
             SetDownloadableFileLink::class
         ],

@@ -51,7 +51,7 @@ class Convertor extends Component
     public function getListeners()
     {
         return [
-            "echo:laravel_database_converts-{$this->storageFolder->id},ConvertStatusUpdate" => 'refreshStatus',
+            "echo:laravel_database_converts-{$this->storageFolder->id},ConvertStatusUpdateEcho" => 'refreshStatus',
         ];
     }
 
@@ -114,7 +114,7 @@ class Convertor extends Component
 
 
     public function convert()
-    {
+    {      
 
         $this->converting = true;
 
@@ -122,13 +122,31 @@ class Convertor extends Component
 
         $storageFolder = $this->storageFolder;
 
-        foreach ($this->files as $file) {
-            $fileName = $file->storePublicly($folderName);
+        $firstFileName = null;
+
+        foreach ($this->files as  $key => $file) {
+
+            $fileName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
+            $ext = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+            
+            $singleFileName = Str::slug($fileName).'_'.$key.'.'.$ext;
+
+            $fileFullName = $file->storePubliclyAs($folderName, $singleFileName );
+
+            if(is_null($firstFileName)){
+                $firstFileName = $fileName;
+            }
 
             $storageFolder->files()->create([
-                'name' => $fileName
+                'name' => $fileFullName,
+                'filename' => $fileName
             ]);
         }
+
+        $storageFolder->filename = $firstFileName;
+
+        $storageFolder->save();
 
         $fromTo = explode('-to-', $this->currentType);
 
@@ -146,7 +164,9 @@ class Convertor extends Component
 
         $method = Str::camel($this->currentType);
 
-        ConvertorService::$method($result);
+        $convertor = new ConvertorService($result);
+
+        \call_user_func( [$convertor, $method]);
 
       
     }
@@ -156,18 +176,17 @@ class Convertor extends Component
 
     public function download()
     {
-        $path = storage_path('app/public/' . $this->storageFolder->name . '.zip');
+        $filePath = $this->storageFolder->conversion->filename;
+        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
 
         $this->storageFolder->conversion->downloaded_at = Carbon::now();
         $this->storageFolder->conversion->save();
        
-        if (file_exists($path)) {
-            
-            $headers = array(
-                'Content-Type' => 'application/octet-stream',
-            );
+        if (file_exists($filePath)) { 
 
-            return Storage::disk('public')->download($this->storageFolder->name . '.zip', $this->storageFolder->name . '.zip' , $headers);
+            $fileName = Str::slug($this->storageFolder->filename).'.'.$ext;
+
+            return \Response::download($filePath, $fileName);
         }else{
             $this->sendMessage('File deleted from server', 'error');
         }
