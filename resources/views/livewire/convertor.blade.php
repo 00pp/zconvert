@@ -6,23 +6,32 @@
         </div>
     @endif
 
-    @if($converting)
-    <div  class="text-center py-15">
-        @include('svg.loading')
-        <p class="mt-3">Converting...</p>
-    </div>
+    @if ($converting)
+        <div class="text-center py-15">
+            @include('svg.loading')
+            <p class="mt-3">Converting...</p>
+        </div>
     @endif
 
-    <div wire:loading.block wire:target="newfiles" class="text-center py-15">
-        @include('svg.loading')
-        <p class="mt-3">Uploading...</p>
-    </div>
+    @if ($uploading)
+        <div class="text-center py-15">
+            @include('svg.loading')
+            <p class="mt-3">Uploading...</p>
+        </div>
+    @endif
 
 
     @error('newfiles') <span class="error">{{ $message }}</span> @enderror
 
+    <form>
 
-    @if (count($files) && !$isFinished  && !$converting)
+        <div class="g-recaptcha d-inline-block" data-sitekey="{{ env('INVISIBLE_RECAPTCHA_SITEKEY') }}"
+            data-callback="recaptchaCallback" data-size="invisible" wire:ignore></div>
+
+    </form>
+
+
+    @if (count($files) && !$isFinished && !$converting && !$uploading)
         <table wire:loading.remove wire:target="convert"
             class="mx-auto max-w-4xl w-full whitespace-nowrap rounded-lg bg-white divide-y divide-gray-300 overflow-hidden mt-10 rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blu">
 
@@ -51,7 +60,9 @@
 
     <form enctype="multipart/form-data" wire:loading.remove wire:target="convert">
 
-        @if ($isFinished && !$converting)
+
+
+        @if ($isFinished && !$converting && !$uploading)
             <div class="flex w-full pt-24 pb-10 items-center justify-center bg-grey-lighter">
                 <button wire:click.prevent="download"
                     class="w-64 flex flex-col items-center px-4 py-6 bg-green-400 text-white rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blue hover:text-gray-800">
@@ -61,25 +72,25 @@
             </div>
 
             <div class="flex justify-center pb-24">
-                <a href="{{route('convertor.page',['type'=>$currentType])}}" class="flex items-center"> @include('svg.reset') <span
-                        class="ml-2">Convert more</span></a>
+                <a href="{{ route('convertor.page', ['type' => $currentType]) }}" class="flex items-center">
+                    @include('svg.reset') <span class="ml-2">Convert more</span></a>
             </div>
 
-        @elseif(!$converting)
+        @elseif(!$converting && !$uploading)
             @if (count($files))
                 <div class="flex py-10">
                     @if (count($files) < config('app.max_files_allowed'))
-                    <div class="flex-auto">
-                        <div class="flex items-center justify-center bg-grey-lighter">
-                            <label
-                                class="w-64 flex flex-col items-center px-4 py-6 bg-gray-800 text-white rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer ">
-                                @include('svg.select_file')
-                                <span class="mt-2 text-base leading-normal">Select a file</span>
-                                <input type="file" wire:model="newfiles" multiple class="hidden"
-                                    accept="{{ $config['mimes'] }}">
-                            </label>
+                        <div class="flex-auto">
+                            <div class="flex items-center justify-center bg-grey-lighter">
+                                <label
+                                    class="w-64 flex flex-col items-center px-4 py-6 bg-gray-800 text-white rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer ">
+                                    @include('svg.select_file')
+                                    <span class="mt-2 text-base leading-normal">Select a file</span>
+                                    <input type="file" wire:model="newfiles" multiple class="hidden" onchange="recaptchaCallback()"
+                                        accept="{{ $config['mimes'] }}">
+                                </label>
+                            </div>
                         </div>
-                    </div>
                     @endif
                     <div class="flex-auto">
                         <div class="flex items-center justify-center ">
@@ -93,16 +104,16 @@
                     </div>
                 </div>
             @else
-            <div class="flex w-full py-24 items-center justify-center bg-grey-lighter" wire:loading.remove
-                    wire:target="newfiles">
+                <div class="flex w-full py-24 items-center justify-center bg-grey-lighter">
                     <label
                         class="w-64 flex flex-col items-center px-4 py-6 bg-gray-800 text-white rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer ">
                         @include('svg.select_file')
                         <span class="mt-2 text-base leading-normal">Select a file</span>
-                        <input type="file" wire:model="newfiles" multiple class="hidden"
+                        <input type="file" wire:model="newfiles" multiple class="hidden"  onchange="recaptchaCallback()"
                             accept="{{ $config['mimes'] }}">
                     </label>
                 </div>
+
             @endif
         @endif
 
@@ -115,12 +126,26 @@
 </div>
 
 
-<script>
-    document.addEventListener('livewire:load', function() {
-        
 
-    // });
-    toastr.options = {
+<script src="https://www.google.com/recaptcha/api.js?render={{ env('INVISIBLE_RECAPTCHA_SITEKEY') }}"></script>
+<script>
+    var recaptchaCallback = function() {
+        @this.set('uploading', true);
+        grecaptcha.execute('{{ env('INVISIBLE_RECAPTCHA_SITEKEY') }}', {
+                action: 'validate_captcha'
+            })
+            .then(function(token) {
+                @this.set('recaptcha_response', token);
+            });
+    }
+
+
+  
+
+    document.addEventListener('livewire:load', function() {
+       
+
+        toastr.options = {
             "closeButton": true,
             "debug": false,
             "newestOnTop": false,
@@ -139,16 +164,21 @@
         };
 
         Livewire.on('showAlert', data => {
-            toastr[data.type]( data.message, data.title);
+            toastr[data.type](data.message, data.title);
             // console.log(message, type);
         });
 
-
-
-        window.Echo.channel('laravel_database_converts-{{$storageFolder->id}}')
-        .listen('App\\Events\\ConvertStatusUpdate', (e) => {
-            console.log(e);
+        Livewire.on('reCaptcha', () => {
+            // recaptchaCallback();
         });
 
+
+
+        window.Echo.channel('laravel_database_converts-{{ $storageFolder->id }}')
+            .listen('ConvertStatusUpdateEcho', (e) => {
+                console.log(e);
+            });
+
     });
+
 </script>

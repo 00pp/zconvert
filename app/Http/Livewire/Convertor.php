@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Storage;
 use Validator;
+use Illuminate\Support\Facades\Http;
 
 class Convertor extends Component
 {
@@ -21,12 +22,15 @@ class Convertor extends Component
     public $config;
     public $isFinished;
     public $converting = false;
+    public $uploading = false;
 
     public $files = [];
     public $newfiles = [];
     public $storageFolder;
 
     public $types = [];
+
+    public $recaptcha_response;
 
     // protected $listeners = ['showAlert'];
 
@@ -35,7 +39,7 @@ class Convertor extends Component
 
     public function mount()
     {
-        $this->isFinished = false;     
+        $this->isFinished = false;
         $parts = explode('-', $this->currentType);
         $this->config = config('convertor.types.' . $parts[0]);
 
@@ -44,7 +48,6 @@ class Convertor extends Component
         $storageFolder->name = $directoryName;
         $storageFolder->save();
         $this->storageFolder = $storageFolder;
-
     }
 
 
@@ -70,14 +73,36 @@ class Convertor extends Component
 
     public function updatedNewfiles()
     {
-
         $totalFiles = count($this->files) + count($this->newfiles);
 
         $rules = 'required|file|' . $this->config['rules'] . '|max:' . config('app.max_file_size_limit');
-     
+
+        if (!session()->has('noRobot')) {
+
+            $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+                'secret' => env('INVISIBLE_RECAPTCHA_SECRETKEY'),
+                'response' => $this->recaptcha_response,
+            ]);
+
+            $captchaResult = $response->json();
+
+            if (!$captchaResult['success']) {
+                $messages = 'Captcha not valid';
+                session()->forget('noRobot');
+                $this->sendMessage($messages, 'error');
+                $this->uploading = false;
+
+                return;
+            }
+            session(['noRobot' => '1']);
+        }
+
+
         $validator = Validator::make(
             ['newfiles' => $this->newfiles],
-            ['newfiles.*' => $rules]
+            [
+                'newfiles.*' => $rules
+            ]
         );
 
         if ($validator->fails()) {
@@ -88,6 +113,8 @@ class Convertor extends Component
             }
 
             $this->sendMessage($messages, 'error');
+            $this->uploading = false;
+
             return;
         }
 
@@ -95,10 +122,12 @@ class Convertor extends Component
         if ($totalFiles > config('app.max_files_allowed')) {
 
             $this->sendMessage('Maximum file upload limit is less than: ' . config('app.max_files_allowed'), 'error');
+
             return;
         }
 
         $this->files = array_merge($this->files, $this->newfiles);
+        $this->uploading = false;
     }
 
 
@@ -114,7 +143,7 @@ class Convertor extends Component
 
 
     public function convert()
-    {      
+    {
 
         $this->converting = true;
 
@@ -129,12 +158,12 @@ class Convertor extends Component
             $fileName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
 
             $ext = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
-            
-            $singleFileName = Str::slug($fileName).'_'.$key.'.'.$ext;
 
-            $fileFullName = $file->storePubliclyAs($folderName, $singleFileName );
+            $singleFileName = Str::slug($fileName) . '_' . $key . '.' . $ext;
 
-            if(is_null($firstFileName)){
+            $fileFullName = $file->storePubliclyAs($folderName, $singleFileName);
+
+            if (is_null($firstFileName)) {
                 $firstFileName = $fileName;
             }
 
@@ -166,9 +195,7 @@ class Convertor extends Component
 
         $convertor = new ConvertorService($result);
 
-        \call_user_func( [$convertor, $method]);
-
-      
+        \call_user_func([$convertor, $method]);
     }
 
 
@@ -181,13 +208,13 @@ class Convertor extends Component
 
         $this->storageFolder->conversion->downloaded_at = Carbon::now();
         $this->storageFolder->conversion->save();
-       
-        if (file_exists($filePath)) { 
 
-            $fileName = Str::slug($this->storageFolder->filename).'.'.$ext;
+        if (file_exists($filePath)) {
+
+            $fileName = Str::slug($this->storageFolder->filename) . '.' . $ext;
 
             return \Response::download($filePath, $fileName);
-        }else{
+        } else {
             $this->sendMessage('File deleted from server', 'error');
         }
     }
