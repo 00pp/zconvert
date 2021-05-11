@@ -7,6 +7,7 @@ use App\Models\Conversion;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Bus;
+use App\Events\ConvertionStatusChanged;
 
 class DeleteOldFiles extends Command
 {
@@ -15,14 +16,14 @@ class DeleteOldFiles extends Command
      *
      * @var string
      */
-    protected $signature = 'zconvert:clear_files';
+    protected $signature = 'zconvert:clear {--downloaded=1} {--hour=1}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Команда, которая будет удалять уже скачанные файлы.';
+    protected $description = 'Команда, которая будет удалять  скачанные файлы или старые файлы.';
 
     /**
      * Create a new command instance.
@@ -41,16 +42,26 @@ class DeleteOldFiles extends Command
      */
     public function handle()
     {
-        $convertions = Conversion::with('folder')->where('created_at', '<=', Carbon::now()->subHours(1)->toDateTimeString())
-            ->where('status', 'converted')
-            ->whereNotNull('downloaded_at')
-            ->get();
+        $query = Conversion::with('folder')->where('created_at', '<=', Carbon::now()->subHours($this->option('hour'))->toDateTimeString())
+            ->where('status','!=' ,'deleted');
+         
+            
+        if($this->option('downloaded') == 1){
+            $query->whereNotNull('downloaded_at');
+        } 
 
-      
+        $convertions = $query->get();
+
+        
         if (is_null($convertions)) return;
 
         foreach ($convertions as $convertion) {
-            if ($convertion->folder) Bus::chain([ new DeleteOldFilesJob($convertion->folder) ])->dispatch();
+            if ($convertion->folder) Bus::chain([ 
+                new DeleteOldFilesJob($convertion->folder),
+                function() use($convertion){
+                    event(new ConvertionStatusChanged($convertion, 'deleted'));
+                }                
+                ])->dispatch();
         }
     }
 }

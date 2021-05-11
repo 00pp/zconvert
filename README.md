@@ -53,6 +53,10 @@ SESSION_DRIVER = file
 - php artisan cache:clear
 - php artisan config:clear
 
+## Крон 
+- * * * * * cd /path-to-your-project && php artisan schedule:run >> /dev/null 2>&1
+
+
 ## Misc
 
 - нужно ли, чтоб libreoffice работал как сервер? - нет

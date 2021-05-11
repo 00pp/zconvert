@@ -23,7 +23,7 @@ class ConvertionStatusChanged
      *
      * @return void
      */
-    public function __construct(Conversion $conversion,  $status)
+    public function __construct($conversion,  $status)
     {
         $this->conversion = $conversion;
         $this->status = $status;

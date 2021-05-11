@@ -30,7 +30,7 @@ class DeleteOldFilesJob implements ShouldQueue
     public function handle()
     {
         $uploadedFiles = storage_path('app/uploaded/' . $this->storage_folder->name);       
-        $convertedFile = storage_path('app/public/' . $this->storage_folder->name . '.zip');
+        $convertedFile = storage_path('app/public/' . $this->storage_folder->name);
         /**
          * Удаляем загруженные файлы 
          */
@@ -39,7 +39,7 @@ class DeleteOldFilesJob implements ShouldQueue
         /**
          * Удаляем конвертированные файлы 
          */
-        if (File::exists($convertedFile)) File::delete($convertedFile);
+        if (File::exists($convertedFile)) File::deleteDirectory($convertedFile);
 
 
         \Log::info(get_class($this) . ": $uploadedFiles");

@@ -30,9 +30,10 @@ class ConvertorService
 
     if (!is_null($destination)) {
       $this->destination = $destination;
-    } else {
-      $this->destination = storage_path('app/public');
+    } else {      
+      $this->destination = storage_path('app/public/'.$storageFolder->name);
     }
+    \File::makeDirectory($this->destination);
   }
 
 

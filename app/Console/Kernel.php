@@ -25,7 +25,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('zconvert:clear_files')->hourly();
+        //Удаляет скаченные файлы за последниее -1 час 
+        $schedule->command('zconvert:clear')->hourly();
+
+        //Удаляет все файлы за последниее -24 часа
+        $schedule->command('zconvert:clear --downloaded=0 --hour=24')->daily();
     }
 
     /**

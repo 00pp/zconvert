@@ -32,11 +32,6 @@ class Convertor extends Component
 
     public $recaptcha_response;
 
-    // protected $listeners = ['showAlert'];
-
-    // protected $listeners = ['echo-private:converts,ConvertStatusUpdate' => 'refreshStatus'];
-
-
     public function mount()
     {
         $this->isFinished = false;
@@ -73,10 +68,8 @@ class Convertor extends Component
 
     public function updatedNewfiles()
     {
-        $totalFiles = count($this->files) + count($this->newfiles);
-
-        $rules = 'required|file|' . $this->config['rules'] . '|max:' . config('app.max_file_size_limit');
-
+       
+        //reCaptcha проверка
         if (!session()->has('noRobot')) {
 
             $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
@@ -97,9 +90,16 @@ class Convertor extends Component
             session(['noRobot' => '1']);
         }
 
+        //Валидация
+        $totalFiles = count($this->files) + count($this->newfiles);
+
+        $rules = 'required|file|' . $this->config['rules'] . '|max:' . config('app.max_file_size_limit');
+
 
         $validator = Validator::make(
-            ['newfiles' => $this->newfiles],
+            [
+                'newfiles' => $this->newfiles
+            ],
             [
                 'newfiles.*' => $rules
             ]
@@ -128,6 +128,7 @@ class Convertor extends Component
 
         $this->files = array_merge($this->files, $this->newfiles);
         $this->uploading = false;
+        $this->sendMessage('Maximum file upload limit is less than: ' . config('app.max_files_allowed'), 'error');
     }
 
 
@@ -179,17 +180,12 @@ class Convertor extends Component
 
         $fromTo = explode('-to-', $this->currentType);
 
-
         $storageFolder->conversion()->create([
             'from_type' => $fromTo[0],
             'to_type' => $fromTo[1]
         ]);
 
-
         $result = StorageFolder::find($storageFolder->id);
-
-        // event(new \App\Events\ConvertStatusUpdate($this->storageFolder));   
-
 
         $method = Str::camel($this->currentType);
 
