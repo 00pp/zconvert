@@ -86,15 +86,16 @@
                                     class="w-64 flex flex-col items-center px-4 py-6 bg-gray-800 text-white rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer ">
                                     @include('svg.select_file')
                                     <span class="mt-2 text-base leading-normal">Select a file</span>
-                                    <input type="file" wire:model="newfiles" multiple class="hidden" onchange="recaptchaCallback()"
-                                        accept="{{ $config['mimes'] }}">
+                                    <input type="file" wire:model="newfiles" multiple class="hidden"
+                                        onchange="recaptchaCallback()" accept="{{ $config['mimes'] }}">
                                 </label>
+                                
                             </div>
                         </div>
                     @endif
                     <div class="flex-auto">
                         <div class="flex items-center justify-center ">
-                            <button wire:click.prevent="convert"
+                            <button wire:click.prevent="convert" 
                                 class="w-64 flex flex-col items-center px-4 py-6 bg-green-400 text-white rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer  ">
                                 @include('svg.convert')
 
@@ -109,7 +110,7 @@
                         class="w-64 flex flex-col items-center px-4 py-6 bg-gray-800 text-white rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer ">
                         @include('svg.select_file')
                         <span class="mt-2 text-base leading-normal">Select a file</span>
-                        <input type="file" wire:model="newfiles" multiple class="hidden"  onchange="recaptchaCallback()"
+                        <input type="file" wire:model="newfiles" multiple class="hidden" onchange="recaptchaCallback()"
                             accept="{{ $config['mimes'] }}">
                     </label>
                 </div>
@@ -136,21 +137,24 @@
             })
             .then(function(token) {
                 @this.set('recaptcha_response', token);
+         
             });
     }
 
 
-  
 
     document.addEventListener('livewire:load', function() {
-       
+
+
+
+
 
         toastr.options = {
             "closeButton": true,
             "debug": false,
             "newestOnTop": false,
             "progressBar": true,
-            "positionClass": "toast-top-center",
+            "positionClass": "toast-top-right",
             "preventDuplicates": false,
             "showDuration": "300",
             "hideDuration": "1000",

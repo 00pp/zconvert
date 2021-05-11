@@ -35,6 +35,9 @@
             <main>
                 {{ $slot }}
             </main>
+            <div class="container mx-auto max-w-4xl w-full ">
+                @yield('footer')
+            </div>
         </div>
 
         @stack('modals')

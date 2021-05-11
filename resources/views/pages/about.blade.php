@@ -1,5 +1,8 @@
 @extends('layouts.frontend')
 
+
+@section('title', 'About')
+
 @section('content')
 
   <div class=" text-gray-200 bg-gray-900">
@@ -20,4 +23,8 @@
   </div>
 
 
+@endsection
+
+@section('footer')
+   <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellat, tempora.</p>
 @endsection

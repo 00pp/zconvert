@@ -33,6 +33,10 @@
     <div>
         @yield('content')
     </div>
+
+    <div class="container mx-auto max-w-4xl w-full">
+        @yield('footer')
+    </div>
 </div>
 @livewireScripts
 

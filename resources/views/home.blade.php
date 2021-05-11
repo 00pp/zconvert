@@ -1,5 +1,8 @@
 @extends('layouts.frontend')
 
+
+@section('title', 'Home ConvertorApp')
+
 @section('content')
 
     <!-- This is an example component -->
@@ -99,4 +102,8 @@
     </div>
 
 
+@endsection
+
+@section('footer')
+   <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellat, tempora.</p>
 @endsection

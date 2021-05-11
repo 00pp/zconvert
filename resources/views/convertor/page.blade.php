@@ -1,5 +1,8 @@
 @extends('layouts.frontend')
 
+@section('title')
+    File Converter {{$type}}
+@endsection
 @section('content')
 
   <div class=" text-gray-200 bg-gray-900">
@@ -22,4 +25,8 @@
   <livewire:convertor  :currentType="$type"/>
 
 
+@endsection
+
+@section('footer')
+   <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellat, tempora.</p>
 @endsection
