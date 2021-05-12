@@ -20,7 +20,7 @@ class Pdftoppm implements PdfToImageInterface
             $fileName = $file->getFilename();
             $baseName = substr($file->getBasename('.pdf'), 0, -2);
             $path = "$destination/$baseName";
-            \File::makeDirectory($path);
+            if(!\File::exists($path)) \File::makeDirectory($path);
             if($file->getExtension() == 'pdf'){
                $commands .= " && pdftoppm $fileName $destination/$baseName/$baseName -jpeg";
             }
