@@ -1,5 +1,5 @@
 {
-	"authHost": "http://localhost",
+	"authHost": "https://abconvert.xyz",
 	"authEndpoint": "/broadcasting/auth",
 	"clients": [
 		{
@@ -20,8 +20,8 @@
 	"protocol": "https",
 	"socketio": {},
 	"secureOptions": 67108864,
-	"sslCertPath": "",
-	"sslKeyPath": "",
+	"sslCertPath": "/home/abconvert/ssl.cert",
+    "sslKeyPath": "/home/abconvert/ssl.key",
 	"sslCertChainPath": "",
 	"sslPassphrase": "",
 	"subscribers": {
@@ -29,9 +29,9 @@
 		"redis": true
 	},
 	"apiOriginAllow": {
-		"allowCors": false,
-		"allowOrigin": "",
-		"allowMethods": "",
-		"allowHeaders": ""
-	}
+        "allowCors": true,
+        "allowOrigin": "*",
+        "allowMethods": "GET, POST",
+        "allowHeaders": "Origin, Content-Type, X-Auth-Token, X-Requested-With, Accept, Authorization, X-CSRF-TOKEN, X-Socket-Id"
+    }
 }
