@@ -7,7 +7,7 @@
     @endif
 
     @if ($converting)
-        <div class="text-center py-15">
+        <div class="text-center py-15" >
             @include('svg.loading')
             <p class="mt-3">Converting...</p>
         </div>
@@ -82,14 +82,19 @@
                     @if (count($files) < config('app.max_files_allowed'))
                         <div class="flex-auto">
                             <div class="flex items-center justify-center bg-grey-lighter">
-                                <label
+                                <div>
+                                    <label
                                     class="w-64 flex flex-col items-center px-4 py-6 bg-gray-800 text-white rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer ">
                                     @include('svg.select_file')
                                     <span class="mt-2 text-base leading-normal">Select a file</span>
                                     <input type="file" wire:model="newfiles" multiple class="hidden"
                                         onchange="recaptchaCallback()" accept="{{ $config['mimes'] }}">
                                 </label>
-                                
+                                @if (count($files))
+                                <p class="text-center font-bold text-sm">{{env('MAX_FILES_ALLOWED')}} files maximum<p>
+                                @endif
+                                </div>
+
                             </div>
                         </div>
                     @endif
@@ -106,13 +111,19 @@
                 </div>
             @else
                 <div class="flex w-full py-24 items-center justify-center bg-grey-lighter">
-                    <label
+                    <div>
+                        <label
                         class="w-64 flex flex-col items-center px-4 py-6 bg-gray-800 text-white rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer ">
                         @include('svg.select_file')
                         <span class="mt-2 text-base leading-normal">Select a file</span>
                         <input type="file" wire:model="newfiles" multiple class="hidden" onchange="recaptchaCallback()"
                             accept="{{ $config['mimes'] }}">
-                    </label>
+                        </label>
+                        @if (count($files))
+                        <p class="text-center font-bold text-sm">{{env('MAX_FILES_ALLOWED')}} files maximum<p>
+                        @endif
+                    </div>
+
                 </div>
 
             @endif
