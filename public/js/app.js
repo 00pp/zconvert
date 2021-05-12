@@ -3831,7 +3831,7 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_0__.default({
   broadcaster: 'socket.io',
-  host: window.location.hostname + ':6001'
+  host: window.location.hostname + ':2053'
 });
 
 /***/ }),

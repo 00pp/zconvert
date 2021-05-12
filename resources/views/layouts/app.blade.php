@@ -17,8 +17,8 @@
         <!-- Scripts -->
         <script src="{{ mix('js/app.js') }}" defer></script>
 
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.2/js/toastr.min.js">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.2/js/toastr.min.js">
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
