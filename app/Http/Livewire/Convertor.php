@@ -73,7 +73,7 @@ class Convertor extends Component
         if (!session()->has('noRobot')) {
 
             $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
-                'secret' => env('INVISIBLE_RECAPTCHA_SECRETKEY'),
+                'secret' => config('convertor.captcha.secret_key'),
                 'response' => $this->recaptcha_response,
             ]);
 

@@ -38,7 +38,8 @@ class PdfToImageConverter implements ShouldQueue
      */
     public function handle(PdfToImageInterface $pdfToImage)
     {
-        \File::makeDirectory($this->imageFolder);
+        if(!\File::exists($this->imageFolder)) \File::makeDirectory($this->imageFolder);
+        
         $pdfToImage->convertFiles($this->pdfFolder, $this->imageFolder);
         \Log::info(get_class($this) . ": $this->pdfFolder");
     }

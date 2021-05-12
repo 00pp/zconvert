@@ -25,7 +25,7 @@
 
     <form>
 
-        <div class="g-recaptcha d-inline-block" data-sitekey="{{ env('INVISIBLE_RECAPTCHA_SITEKEY') }}"
+        <div class="g-recaptcha d-inline-block" data-sitekey="{{ config('convertor.captcha.site_key') }}"
             data-callback="recaptchaCallback" data-size="invisible" wire:ignore></div>
 
     </form>
@@ -91,7 +91,7 @@
                                         onchange="recaptchaCallback()" accept="{{ $config['mimes'] }}">
                                 </label>
                                 @if (count($files))
-                                <p class="text-center font-bold text-sm">{{env('MAX_FILES_ALLOWED')}} files maximum<p>
+                                <p class="text-center font-bold text-sm">{{config('app.max_files_allowed')}} files maximum<p>
                                 @endif
                                 </div>
 
@@ -120,7 +120,7 @@
                             accept="{{ $config['mimes'] }}">
                         </label>
                         @if (count($files))
-                        <p class="text-center font-bold text-sm">{{env('MAX_FILES_ALLOWED')}} files maximum<p>
+                        <p class="text-center font-bold text-sm">{{config('app.max_files_allowed')}} files maximum<p>
                         @endif
                     </div>
 
@@ -139,11 +139,11 @@
 
 
 
-<script src="https://www.google.com/recaptcha/api.js?render={{ env('INVISIBLE_RECAPTCHA_SITEKEY') }}"></script>
+<script src="https://www.google.com/recaptcha/api.js?render={{ config('convertor.captcha.site_key') }}"></script>
 <script>
     var recaptchaCallback = function() {
         @this.set('uploading', true);
-        grecaptcha.execute('{{ env('INVISIBLE_RECAPTCHA_SITEKEY') }}', {
+        grecaptcha.execute('{{ config('convertor.captcha.site_key') }}', {
                 action: 'validate_captcha'
             })
             .then(function(token) {
