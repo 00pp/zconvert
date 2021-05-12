@@ -16,7 +16,7 @@ use Illuminate\Queue\SerializesModels;
 
 class ZipFiles implements ShouldQueue
 {
-    use Batchable,Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $conversion, $filename, $source, $destination;
 
@@ -26,10 +26,10 @@ class ZipFiles implements ShouldQueue
      * @return void
      */
     public function __construct($source, $destination, $conversion, $filename)
-    {      
+    {
         $this->source = $source;
         $this->destination = $destination;
-        $this->conversion= $conversion;
+        $this->conversion = $conversion;
         $this->filename = $filename;
     }
 
@@ -40,13 +40,22 @@ class ZipFiles implements ShouldQueue
      */
     public function handle(ZipFilesInterface $zip)
     {
-        $zip->execute($this->filename,$this->source,$this->destination);
-        $this->conversion->zipped_at = Carbon::now();
-        $this->destination = $this->destination.'/'.$this->filename.'.zip';
-        
-        
-        $this->conversion->filename = $this->destination;
-        $this->conversion->save();
+        $filesInFolder = \File::files($this->source);
+
+        if (count($filesInFolder) ==  1 && $filesInFolder[0]->getExtension() == 'pdf') {
+            $this->destination = $this->destination . '/' . $filesInFolder[0]->getFilename();
+            \File::copy($filesInFolder[0]->getPathname(), $this->destination);
+            $this->conversion->filename = $this->destination;
+            $this->conversion->save();
+        } else {
+            \Log::info([$this->filename, $this->source, $this->destination]);
+            $zip->execute($this->filename, $this->source, $this->destination);
+            $this->conversion->zipped_at = Carbon::now();
+            $this->destination = $this->destination . '/' . $this->filename . '.zip';
+            $this->conversion->filename = $this->destination;
+            $this->conversion->save();
+        }
+
 
         \Log::info(get_class($this) . ":  $this->filename");
     }
