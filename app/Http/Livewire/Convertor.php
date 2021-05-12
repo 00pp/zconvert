@@ -156,9 +156,13 @@ class Convertor extends Component
 
         foreach ($this->files as  $key => $file) {
 
-            $fileName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $fileOriginalName = $file->getClientOriginalName();
 
-            $ext = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+            $fileName = pathinfo($fileOriginalName, PATHINFO_FILENAME);
+
+            if(strlen($fileName) == 0) $fileName = Str::random(7);           
+
+            $ext = pathinfo($fileOriginalName, PATHINFO_EXTENSION);
 
             $singleFileName = Str::slug($fileName) . '_' . $key . '.' . $ext;
 
@@ -206,10 +210,17 @@ class Convertor extends Component
         $this->storageFolder->conversion->save();
 
         if (file_exists($filePath)) {
-
+            $headers = [];
             $fileName = Str::slug($this->storageFolder->filename) . '.' . $ext;
-
-            return \Response::download($filePath, $fileName);
+            switch($ext){
+                case 'pdf': 
+                    $headers = ['Content-Type: application/pdf','Content-Length: '. filesize($filePath)]; 
+                    break;
+                case 'zip': 
+                    $headers = ['Content-Type: application/zip','Content-Length: '. filesize($filePath)]; 
+                    break;
+            }
+            return \Response::download($filePath, $fileName, $headers);
         } else {
             $this->sendMessage('File deleted from server', 'error');
         }
