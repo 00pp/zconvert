@@ -33,7 +33,7 @@ class ConvertorService
     } else {      
       $this->destination = storage_path('app/public/'.$storageFolder->name);
     }
-    \File::makeDirectory($this->destination);
+    if(!\File::exists($this->destination))\File::makeDirectory($this->destination);
   }
 
 
@@ -61,10 +61,23 @@ class ConvertorService
   {
     $pdfFolder = $this->uploadFolder . "/pdf";
     $storageFolder = $this->storageFolder;
+    
 
     Bus::chain([
       new DockToPdfConverter($this->uploadFolder, $pdfFolder),
-      new ZipFiles($pdfFolder, $this->destination, $storageFolder->conversion, $storageFolder->name),
+
+      function() use ($pdfFolder, $storageFolder){
+        $filesInFolder = \File::files($pdfFolder);
+        if(count($filesInFolder) > 1){            
+          new ZipFiles($pdfFolder, $this->destination, $storageFolder->conversion, $storageFolder->name);
+        }else{
+            $this->destination = $this->destination.'/'.$filesInFolder[0]->getFilename();
+            \File::copy($filesInFolder[0]->getPathname(), $this->destination);
+            $storageFolder->conversion->filename = $this->destination;
+            $storageFolder->conversion->save();
+        }
+      },
+      
       function () use ($storageFolder) {
         event(new \App\Events\ConvertStatusUpdateEcho($storageFolder));
         event(new ConvertionStatusChanged($storageFolder->conversion, 'converted'));

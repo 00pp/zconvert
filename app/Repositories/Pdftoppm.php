@@ -8,17 +8,24 @@ use App\Repositories\Interfaces\PdfToImageInterface;
 class Pdftoppm implements PdfToImageInterface
 {
 
-    public function execute($file)
-    {
-        return  shell_exec("pdftoppm $file good -jpeg");
-    }
+    
 
     public function convertFiles($source, $destination)
     {
-        //convert all .pdf files into images jpg
-        shell_exec("cd $source && find . -maxdepth 1 -type f -name '*.pdf' -exec pdftoppm -jpeg {} {} \;");
-        //move all the converted jpg files into the folder
-        shell_exec("cd $source && mkdir $destination && mv *.jpg $destination/");
+        $pdfFiles =  \File::files($source);
 
+        $commands = '';
+
+        foreach($pdfFiles as $file) {
+            $fileName = $file->getFilename();
+            $baseName = substr($file->getBasename('.pdf'), 0, -2);
+            $path = "$destination/$baseName";
+            \File::makeDirectory($path);
+            if($file->getExtension() == 'pdf'){
+               $commands .= " && pdftoppm $fileName $destination/$baseName/$baseName -jpeg";
+            }
+        }
+
+        shell_exec("cd $source $commands");
     }
 }

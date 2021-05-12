@@ -128,7 +128,7 @@ class Convertor extends Component
 
         $this->files = array_merge($this->files, $this->newfiles);
         $this->uploading = false;
-        $this->sendMessage('Maximum file upload limit is less than: ' . config('app.max_files_allowed'), 'error');
+        // $this->sendMessage('Maximum file upload limit is less than: ' . config('app.max_files_allowed'), 'info');
     }
 
 

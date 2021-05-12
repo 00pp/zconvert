@@ -40,19 +40,10 @@ class ZipFiles implements ShouldQueue
      */
     public function handle(ZipFilesInterface $zip)
     {
-        $filesInFolder = \File::files($this->source);
-
-        //Если в папке больше 1 файлов то добавляем в архив
-        if(count($filesInFolder) > 1){
-            $zip->execute($this->filename,$this->source,$this->destination);
-            $this->conversion->zipped_at = Carbon::now();
-            $this->destination = $this->destination.'/'.$this->filename.'.zip';
-
-        }else{
-
-            $this->destination = $this->destination.'/'.$filesInFolder[0]->getFilename();
-            \File::copy($filesInFolder[0]->getPathname(), $this->destination);
-        }
+        $zip->execute($this->filename,$this->source,$this->destination);
+        $this->conversion->zipped_at = Carbon::now();
+        $this->destination = $this->destination.'/'.$this->filename.'.zip';
+        
         
         $this->conversion->filename = $this->destination;
         $this->conversion->save();
