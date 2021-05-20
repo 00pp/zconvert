@@ -68,7 +68,7 @@ class Convertor extends Component
 
     public function updatedNewfiles()
     {
-       
+
         //reCaptcha проверка
         if (!session()->has('noRobot')) {
 
@@ -93,8 +93,21 @@ class Convertor extends Component
         //Валидация
         $totalFiles = count($this->files) + count($this->newfiles);
 
-        $rules = 'required|file|' . $this->config['rules'] . '|max:' . config('app.max_file_size_limit');
-
+        $rules = [
+            'required',
+            'file',
+            'max:' . config('app.max_file_size_limit'),
+            function ($attribute, $value, $fail) {
+                $isUploadedFile = $value instanceof \Livewire\TemporaryUploadedFile;
+                if ($isUploadedFile) {
+                    /** @var \Livewire\TemporaryUploadedFile $value */
+                    $isNotWordFile = !Str::endsWith($value->getFilename(), ['.doc', '.docx']);
+                    if ($isNotWordFile) {
+                        $fail('The file must have extension: doc, docx.');
+                    }
+                }
+            },
+        ];
 
         $validator = Validator::make(
             [
@@ -160,7 +173,7 @@ class Convertor extends Component
 
             $fileName = pathinfo($fileOriginalName, PATHINFO_FILENAME);
 
-            if(strlen($fileName) == 0) $fileName = Str::random(7);           
+            if(strlen($fileName) == 0) $fileName = Str::random(7);
 
             $ext = pathinfo($fileOriginalName, PATHINFO_EXTENSION);
 
@@ -213,11 +226,11 @@ class Convertor extends Component
             $headers = [];
             $fileName = Str::slug($this->storageFolder->filename) . '.' . $ext;
             switch($ext){
-                case 'pdf': 
-                    $headers = ['Content-Type: application/pdf','Content-Length: '. filesize($filePath)]; 
+                case 'pdf':
+                    $headers = ['Content-Type: application/pdf','Content-Length: '. filesize($filePath)];
                     break;
-                case 'zip': 
-                    $headers = ['Content-Type: application/zip','Content-Length: '. filesize($filePath)]; 
+                case 'zip':
+                    $headers = ['Content-Type: application/zip','Content-Length: '. filesize($filePath)];
                     break;
             }
             return \Response::download($filePath, $fileName, $headers);
