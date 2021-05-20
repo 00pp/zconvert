@@ -14,11 +14,11 @@
     <link rel="stylesheet" href="{{ mix('css/app.css') }}">
 
     <!-- Scripts -->
-    <script src="//{{ Request::getHost() }}:2053/socket.io/socket.io.js"></script>
-    <script src="{{ mix('js/app.js') }}" defer></script>
+    <script src="//{{ Request::getHost() }}:2053/socket.io/socket.io.js" nonce="xVg49e"></script>
+    <script src="{{ mix('js/app.js') }}" defer nonce="xVg49e"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.2/js/toastr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js" nonce="xVg49e"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.2/js/toastr.min.js" nonce="xVg49e"></script>
 
 
     @livewireStyles

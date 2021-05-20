@@ -100,7 +100,7 @@
                     @endif
                     <div class="flex-auto">
                         <div class="flex items-center justify-center ">
-                            <button wire:click.prevent="convert" 
+                            <button wire:click.prevent="convert"
                                 class="w-64 flex flex-col items-center px-4 py-6 bg-green-400 text-white rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer  ">
                                 @include('svg.convert')
 
@@ -131,16 +131,13 @@
 
 
     </form>
-    {{-- @error('newfiles.*') <span class="error">{{ $message }}</span> @enderror --}}
-
-
-
 </div>
 
 
 
-<script src="https://www.google.com/recaptcha/api.js?render={{ config('convertor.captcha.site_key') }}"></script>
-<script>
+<script src="https://www.google.com/recaptcha/api.js?render={{ config('convertor.captcha.site_key') }}"
+        nonce="xVg49e"></script>
+<script nonce="xVg49e">
     var recaptchaCallback = function() {
         @this.set('uploading', true);
         grecaptcha.execute('{{ config('convertor.captcha.site_key') }}', {
@@ -148,18 +145,10 @@
             })
             .then(function(token) {
                 @this.set('recaptcha_response', token);
-         
             });
     }
 
-
-
     document.addEventListener('livewire:load', function() {
-
-
-
-
-
         toastr.options = {
             "closeButton": true,
             "debug": false,
@@ -180,20 +169,16 @@
 
         Livewire.on('showAlert', data => {
             toastr[data.type](data.message, data.title);
-            // console.log(message, type);
         });
 
         Livewire.on('reCaptcha', () => {
             // recaptchaCallback();
         });
 
-
-
         window.Echo.channel('laravel_database_converts-{{ $storageFolder->id }}')
             .listen('ConvertStatusUpdateEcho', (e) => {
                 console.log(e);
             });
-
     });
 
 </script>

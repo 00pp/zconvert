@@ -68,9 +68,14 @@ class Convertor extends Component
 
     public function updatedNewfiles()
     {
-
         //reCaptcha проверка
         if (!session()->has('noRobot')) {
+            $logId = random_int(10000000, 99999999);
+
+            \Log::info('reCaptcha start', [
+                'token' => $this->recaptcha_response,
+                'log_id' => $logId,
+            ]);
 
             $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
                 'secret' => config('convertor.captcha.secret_key'),
@@ -79,7 +84,12 @@ class Convertor extends Component
 
             $captchaResult = $response->json();
 
-            if (!$captchaResult['success']) {
+            \Log::info('reCaptcha response', [
+                'token' => $captchaResult,
+                'log_id' => $logId,
+            ]);
+
+            if ($this->recaptcha_response && $captchaResult['success'] !== true) {
                 $messages = 'Captcha not valid';
                 session()->forget('noRobot');
                 $this->sendMessage($messages, 'error');
@@ -87,6 +97,7 @@ class Convertor extends Component
 
                 return;
             }
+
             session(['noRobot' => '1']);
         }
 
