@@ -1,6 +1,7 @@
 /node_modules
 /public/hot
 /public/storage
+/public/stats
 /public/icon
 /public/adminer-4.8.0-en.php
 /storage/*.key
