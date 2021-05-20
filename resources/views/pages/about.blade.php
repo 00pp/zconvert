@@ -15,16 +15,12 @@
                         ConvertApp is an online file converter. Right now support Docx and Doc conversion to image
                         format. To get started, use the button below and select files to convert from your computer.
                     </p>
-                    
+
                 </div>
 
-           
+
         </div>
   </div>
 
 
-@endsection
-
-@section('footer')
-   <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellat, tempora.</p>
 @endsection

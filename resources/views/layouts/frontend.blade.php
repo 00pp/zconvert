@@ -20,7 +20,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.2/js/toastr.min.js"></script>
 
-    
+
     @livewireStyles
 
 
@@ -35,7 +35,7 @@
     </div>
 
     <div class="container mx-auto max-w-4xl w-full">
-        @yield('footer')
+        @include('partials.footer')
     </div>
 </div>
 @livewireScripts

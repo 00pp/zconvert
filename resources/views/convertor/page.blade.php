@@ -17,18 +17,15 @@
                         ConvertApp is an online file converter. Right now support Docx and Doc conversion to image
                         format. To get started, use the button below and select files to convert from your computer.
                     </p>
-                    
+
                 </div>
 
-           
+
         </div>
   </div>
 
   <livewire:convertor  :currentType="$type"/>
 
+  <p class="text-center">{{config('convertor.content.'.$type.'.footer')}}</p>
 
-@endsection
-
-@section('footer')
-   <p>{{config('convertor.content.'.$type.'.footer')}}</p>
 @endsection
