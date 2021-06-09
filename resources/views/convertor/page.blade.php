@@ -26,6 +26,6 @@
 
   <livewire:convertor  :currentType="$type"/>
 
-  <p class="text-center">{{config('convertor.content.'.$type.'.footer')}}</p>
+  <p class="text-center">{!! config('convertor.content.'.$type.'.footer') !!}</p>
 
 @endsection

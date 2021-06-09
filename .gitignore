@@ -6,7 +6,8 @@
 /public/adminer-4.8.0-en.php
 /storage/*.key
 /vendor
-.idea/
+/.idea
+/texts
 .env
 yarn.lock
 package-lock.json

@@ -3,7 +3,9 @@
 namespace App\Http\Livewire;
 
 use App\Models\Conversion;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
+use Livewire\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use App\Services\Helper;
 use App\Services\ConvertorService;
@@ -54,7 +56,6 @@ class Convertor extends Component
     }
 
 
-
     public function refreshStatus($event)
     {
         $this->isFinished = true;
@@ -68,6 +69,8 @@ class Convertor extends Component
 
     public function updatedNewfiles()
     {
+        Log::debug('Upload files', $this->newfiles);
+
         //reCaptcha проверка
         if (!session()->has('noRobot')) {
             $logId = random_int(10000000, 99999999);
@@ -109,12 +112,14 @@ class Convertor extends Component
             'file',
             'max:' . config('app.max_file_size_limit'),
             function ($attribute, $value, $fail) {
+                preg_match('|^convert/(\w+)-.*$|', request('fingerprint')['path'], $matches);
                 $isUploadedFile = $value instanceof \Livewire\TemporaryUploadedFile;
                 if ($isUploadedFile) {
                     /** @var \Livewire\TemporaryUploadedFile $value */
-                    $isNotWordFile = !Str::endsWith($value->getFilename(), ['.doc', '.docx']);
+                    $extension = explode(',', str_replace('mimes:', '', config("convertor.types.$matches[1].rules")));
+                    $isNotWordFile = !Str::endsWith($value->getFilename(), $extension);
                     if ($isNotWordFile) {
-                        $fail('The file must have extension: doc, docx.');
+                        $fail(sprintf('The file must have extension: %s.', implode(', ', $extension)));
                     }
                 }
             },
@@ -178,13 +183,13 @@ class Convertor extends Component
 
         $firstFileName = null;
 
-        foreach ($this->files as  $key => $file) {
+        foreach ($this->files as $key => $file) {
 
             $fileOriginalName = $file->getClientOriginalName();
 
             $fileName = pathinfo($fileOriginalName, PATHINFO_FILENAME);
 
-            if(strlen($fileName) == 0) $fileName = Str::random(7);
+            if (strlen($fileName) == 0) $fileName = Str::random(7);
 
             $ext = pathinfo($fileOriginalName, PATHINFO_EXTENSION);
 
@@ -223,8 +228,6 @@ class Convertor extends Component
     }
 
 
-
-
     public function download()
     {
         $filePath = $this->storageFolder->conversion->filename;
@@ -236,12 +239,12 @@ class Convertor extends Component
         if (file_exists($filePath)) {
             $headers = [];
             $fileName = Str::slug($this->storageFolder->filename) . '.' . $ext;
-            switch($ext){
+            switch ($ext) {
                 case 'pdf':
-                    $headers = ['Content-Type: application/pdf','Content-Length: '. filesize($filePath)];
+                    $headers = ['Content-Type: application/pdf', 'Content-Length: ' . filesize($filePath)];
                     break;
                 case 'zip':
-                    $headers = ['Content-Type: application/zip','Content-Length: '. filesize($filePath)];
+                    $headers = ['Content-Type: application/zip', 'Content-Length: ' . filesize($filePath)];
                     break;
             }
             return \Response::download($filePath, $fileName, $headers);
