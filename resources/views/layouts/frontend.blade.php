@@ -19,6 +19,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js" nonce="xVg49e"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.2/js/toastr.min.js" nonce="xVg49e"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" nonce="xVg49e"></script>
 
 
     @livewireStyles

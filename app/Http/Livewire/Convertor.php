@@ -25,6 +25,7 @@ class Convertor extends Component
     public $isFinished;
     public $converting = false;
     public $uploading = false;
+    public $sortOrder = null;
 
     public $files = [];
     public $newfiles = [];
@@ -143,6 +144,8 @@ class Convertor extends Component
 
             $this->sendMessage($messages, 'error');
             $this->uploading = false;
+
+            $this->sortOrder = null;
 
             return;
         }

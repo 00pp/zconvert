@@ -20,7 +20,6 @@
         </div>
     @endif
 
-
     @error('newfiles') <span class="error">{{ $message }}</span> @enderror
 
     <form>
@@ -33,11 +32,15 @@
 
     @if (count($files) && !$isFinished && !$converting && !$uploading)
         <table wire:loading.remove wire:target="convert"
-            class="mx-auto max-w-4xl w-full whitespace-nowrap rounded-lg bg-white divide-y divide-gray-300 overflow-hidden mt-10 rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blu">
+            class="sortable-table mx-auto max-w-4xl w-full whitespace-nowrap rounded-lg bg-white divide-y divide-gray-300 overflow-hidden mt-10 rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blu">
 
             <tbody class="divide-y divide-gray-200">
                 @foreach ($files as $key => $file)
-                    <tr>
+                    <?php /** @var \Livewire\TemporaryUploadedFile $file */?>
+                    <tr class="ui-sortable-handle" data-file="{{ $file->getClientOriginalName() }}">
+                        <td style="width: 30px;padding-left: 10px;cursor:move;">
+                            @include('svg.move')
+                        </td>
                         <td class="px-6 py-4">
                             {{ $file->getClientOriginalName() }} -
                             {{ App\Services\Helper::formatBytes($file->getSize()) }}
@@ -53,6 +56,37 @@
 
             </tbody>
         </table>
+
+            <script nonce="xVg49e">
+                var fixHelper = function(e, ui) {
+                    ui.children().each(function() {
+                        $(this).width($(this).width());
+                    });
+                    return ui;
+                };
+
+                $('.sortable-table tbody').sortable({
+                    helper: fixHelper,
+                    cursor: 'move',
+                    items: ".ui-sortable-handle",
+                    opacity: 0.6,
+                    update: function(event, ui) {
+                        let orderData = [];
+                        console.log(orderData)
+                        let item = ui.item;
+                        let items = $(item).parent().find(".ui-sortable-handle");
+                        console.log(items)
+
+                        items.each(function(index, element) {
+                            orderData.push($(element).data('file'));
+                        })
+
+                        @this.set('sortOrder', orderData);
+                        console.log(orderData);
+                    }
+                });
+            </script>
+
     @endif
 
 
