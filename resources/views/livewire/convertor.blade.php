@@ -35,21 +35,24 @@
             class="sortable-table mx-auto max-w-4xl w-full whitespace-nowrap rounded-lg bg-white divide-y divide-gray-300 overflow-hidden mt-10 rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blu">
 
             <tbody class="divide-y divide-gray-200">
-                @foreach ($files as $key => $file)
-                    <?php /** @var \Livewire\TemporaryUploadedFile $file */?>
-                    <tr class="ui-sortable-handle" data-file="{{ $file->getClientOriginalName() }}">
+                @foreach ($sortOrder as $key => $uploadedFile)
+                    @php
+                    /** @var \Livewire\TemporaryUploadedFile $file */
+                    $file = collect($files)->first(function(\Livewire\TemporaryUploadedFile $file) use ($uploadedFile) {
+                        return $file->getFilename() === $uploadedFile;
+                    });
+                    @endphp
+                    <tr class="ui-sortable-handle" data-file="{{ $uploadedFile }}">
                         <td style="width: 30px;padding-left: 10px;cursor:move;">
                             @include('svg.move')
                         </td>
                         <td class="px-6 py-4">
                             {{ $file->getClientOriginalName() }} -
                             {{ App\Services\Helper::formatBytes($file->getSize()) }}
-
                         </td>
 
-
                         <td class="px-6 py-4 text-center">
-                            <a wire:click="delete({{ $key }})" class="text-red-800 hover:underline">Delete</a>
+                            <a wire:click="delete('{{ $uploadedFile }}')" class="text-red-800 hover:underline">Delete</a>
                         </td>
                     </tr>
                 @endforeach
@@ -81,7 +84,7 @@
                             orderData.push($(element).data('file'));
                         })
 
-                        @this.set('sortOrder', orderData);
+                        @this.set('sortOrder', orderData)
                         console.log(orderData);
                     }
                 });
@@ -93,9 +96,6 @@
 
 
     <form enctype="multipart/form-data" wire:loading.remove wire:target="convert">
-
-
-
         @if ($isFinished && !$converting && !$uploading)
             <div class="flex w-full pt-24 pb-10 items-center justify-center bg-grey-lighter">
                 <button wire:click.prevent="download"

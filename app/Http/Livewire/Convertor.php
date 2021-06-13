@@ -25,7 +25,7 @@ class Convertor extends Component
     public $isFinished;
     public $converting = false;
     public $uploading = false;
-    public $sortOrder = null;
+    public $sortOrder = [];
 
     public $files = [];
     public $newfiles = [];
@@ -61,6 +61,7 @@ class Convertor extends Component
     {
         $this->isFinished = true;
         $this->converting = false;
+        $this->sortOrder = [];
         $this->files = [];
         $this->newfiles = [];
         $this->sendMessage('Converted Successfully!', 'success');
@@ -114,9 +115,9 @@ class Convertor extends Component
             'max:' . config('app.max_file_size_limit'),
             function ($attribute, $value, $fail) {
                 preg_match('|^convert/(\w+)-.*$|', request('fingerprint')['path'], $matches);
-                $isUploadedFile = $value instanceof \Livewire\TemporaryUploadedFile;
+                $isUploadedFile = $value instanceof TemporaryUploadedFile;
                 if ($isUploadedFile) {
-                    /** @var \Livewire\TemporaryUploadedFile $value */
+                    /** @var TemporaryUploadedFile $value */
                     $extension = explode(',', str_replace('mimes:', '', config("convertor.types.$matches[1].rules")));
                     $isNotWordFile = !Str::endsWith($value->getFilename(), $extension);
                     if ($isNotWordFile) {
@@ -145,7 +146,7 @@ class Convertor extends Component
             $this->sendMessage($messages, 'error');
             $this->uploading = false;
 
-            $this->sortOrder = null;
+            $this->sortOrder = [];
 
             return;
         }
@@ -158,7 +159,12 @@ class Convertor extends Component
             return;
         }
 
+        foreach ($this->newfiles as $key => $file) {
+            /** @var TemporaryUploadedFile $file */
+            $this->sortOrder[] = $file->getFilename();
+        }
         $this->files = array_merge($this->files, $this->newfiles);
+
         $this->uploading = false;
         // $this->sendMessage('Maximum file upload limit is less than: ' . config('app.max_files_allowed'), 'info');
     }
@@ -169,9 +175,12 @@ class Convertor extends Component
         return view('livewire.convertor');
     }
 
-    public function delete($index)
+    public function delete($uploadedFile)
     {
-        unset($this->files[$index]);
+        $this->files = collect($this->files)->reject(function(TemporaryUploadedFile $file) use ($uploadedFile) {
+            return $file->getFilename() === $uploadedFile;
+        })->toArray();
+        unset($this->sortOrder[array_search($uploadedFile, $this->sortOrder)]);
     }
 
 
@@ -186,7 +195,11 @@ class Convertor extends Component
 
         $firstFileName = null;
 
-        foreach ($this->files as $key => $file) {
+        foreach ($this->sortOrder as $key => $uploadedFile) {
+
+            $file = collect($this->files)->first(function(TemporaryUploadedFile $file) use ($uploadedFile) {
+                return $file->getFilename() === $uploadedFile;
+            });
 
             $fileOriginalName = $file->getClientOriginalName();
 
@@ -196,7 +209,7 @@ class Convertor extends Component
 
             $ext = pathinfo($fileOriginalName, PATHINFO_EXTENSION);
 
-            $singleFileName = Str::slug($fileName) . '_' . $key . '.' . $ext;
+            $singleFileName = $key . '_' . Str::slug($fileName) . '.' . $ext;
 
             $fileFullName = $file->storePubliclyAs($folderName, $singleFileName);
 
