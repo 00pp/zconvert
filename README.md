@@ -40,6 +40,11 @@ redirect_stderr=true
 stdout_logfile=/var/log/laravel-worker.log
 ```
 
+Файлы, где поправить порты laravel echo:
+./public/js/app.js:
+./resources/js/bootstrap.js
+./app/laravel-echo-server.json
+
 - sudo supervisorctl reread
 - sudo supervisorctl update
 - sudo supervisorctl restart laravel-worker:*
