@@ -44,10 +44,13 @@ stdout_logfile=/var/log/laravel-worker.log
 ./public/js/app.js:
 ./resources/js/bootstrap.js
 ./app/laravel-echo-server.json
+- После редактирования: npm run dev
 
 - sudo supervisorctl reread
 - sudo supervisorctl update
-- sudo supervisorctl restart laravel-worker:*
+- sudo supervisorctl restart all
+
+- iptables -A INPUT -p tcp -m tcp --dport ПОРТ-LARAVEL-ECHO -j ACCEPT 
 
 - .env
 ``` 
@@ -66,6 +69,17 @@ SESSION_DRIVER = file
 
 - нужно ли, чтоб libreoffice работал как сервер? - нет
 - в какую папку складываются файлы, которые подгружаются и потом конвертируются? - storage/app/public
+
+## Add to website apache config (asuming 2099 is a laravel echo port)
+
+ewriteEngine On
+RewriteCond %{REQUEST_URI}  ^/socket.io            [NC]
+RewriteCond %{QUERY_STRING} transport=websocket    [NC]
+RewriteRule /(.*)           ws://localhost:2099/$1 [P,L]
+
+ProxyPass        /socket.io http://localhost:2099/socket.io
+ProxyPassReverse /socket.io http://localhost:2099/socket.io 
+IPCCommTimeout 31
 
 
 
