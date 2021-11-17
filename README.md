@@ -72,6 +72,7 @@ SESSION_DRIVER = file
 
 ## Add to website apache config (asuming 2099 is a laravel echo port)
 
+``` 
 ewriteEngine On
 RewriteCond %{REQUEST_URI}  ^/socket.io            [NC]
 RewriteCond %{QUERY_STRING} transport=websocket    [NC]
@@ -80,6 +81,6 @@ RewriteRule /(.*)           ws://localhost:2099/$1 [P,L]
 ProxyPass        /socket.io http://localhost:2099/socket.io
 ProxyPassReverse /socket.io http://localhost:2099/socket.io 
 IPCCommTimeout 31
-
+``` 
 
 
